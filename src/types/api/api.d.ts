@@ -95,6 +95,7 @@ declare namespace Api {
       id: number
       avatar: string
       status: string
+      isLocked: number
       userName: string
       userGender: string
       nickName: string
@@ -131,5 +132,16 @@ declare namespace Api {
       Pick<RoleListItem, 'roleId' | 'roleName' | 'roleCode' | 'description' | 'enabled'> &
         Api.Common.CommonSearchParams
     >
+
+    /** 更新锁定状态参数 */
+    interface UpdateLockedParams {
+      ids: string[]
+    }
+
+    /** 更新锁定状态响应 */
+    interface UpdateLockedResponse {
+      success: boolean
+      message?: string
+    }
   }
 }

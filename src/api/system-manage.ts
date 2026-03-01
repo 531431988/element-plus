@@ -23,3 +23,19 @@ export function fetchGetMenuList() {
     url: '/c2m/menu/all'
   })
 }
+
+// 更新用户锁定状态（启用）
+export function fetchUpdateUserLocked(params: Api.SystemManage.UpdateLockedParams) {
+  return request.post<Api.SystemManage.UpdateLockedResponse>({
+    url: '/c2m/sys/user/locked',
+    params
+  })
+}
+
+// 更新用户解锁状态（禁用）
+export function fetchUpdateUserUnLocked(params: Api.SystemManage.UpdateLockedParams) {
+  return request.post<Api.SystemManage.UpdateLockedResponse>({
+    url: '/c2m/sys/user/unLocked',
+    params
+  })
+}

@@ -48,8 +48,9 @@
   import { fetchGetUserList } from '@/api/system-manage'
   import UserSearch from './modules/user-search.vue'
   import UserDialog from './modules/user-dialog.vue'
-  import { ElTag, ElMessageBox, ElImage } from 'element-plus'
+  import { ElTag, ElMessageBox, ElImage, ElMessage } from 'element-plus'
   import { DialogType } from '@/types'
+  import { fetchUpdateUserLocked, fetchUpdateUserUnLocked } from '@/api/system-manage'
 
   defineOptions({ name: 'User' })
 
@@ -121,6 +122,7 @@
       columnsFactory: () => [
         { type: 'selection' }, // 勾选列
         { type: 'index', width: 60, label: '序号' }, // 序号
+        { label: '账户', prop: 'userName' },
         {
           prop: 'userInfo',
           label: '用户名',
@@ -142,24 +144,41 @@
             ])
           }
         },
-        {
+        /*  {
           prop: 'userGender',
           label: '性别',
           sortable: true,
           formatter: (row) => row.userGender
-        },
+        }, */
         { prop: 'userPhone', label: '手机号' },
         {
-          prop: 'status',
+          prop: 'isLocked',
           label: '状态',
           formatter: (row) => {
-            const statusConfig = getUserStatusConfig(row.status)
-            return h(ElTag, { type: statusConfig.type }, () => statusConfig.text)
+            return h(ElSwitch, {
+              modelValue: row.isLocked,
+              'inline-prompt': true,
+              'active-text': '启用',
+              'inactive-text': '禁用',
+              'active-value': 0,
+              'inactive-value': 1,
+              'onUpdate:modelValue': async (val: boolean) => {
+                try {
+                  const params = { ids: [String(row.id)] }
+                  val ? await fetchUpdateUserLocked(params) : await fetchUpdateUserUnLocked(params)
+                  ElMessage.success('操作成功')
+                  refreshData()
+                } catch (error) {
+                  ElMessage.error('操作失败，请重试')
+                }
+              }
+            })
           }
         },
         {
           prop: 'createTime',
           label: '创建日期',
+          width: 200,
           sortable: true
         },
         {
@@ -230,12 +249,12 @@
    */
   const deleteUser = (row: UserListItem): void => {
     console.log('删除用户:', row)
-    ElMessageBox.confirm(`确定要注销该用户吗？`, '注销用户', {
+    ElMessageBox.confirm(`确定要删除该用户吗？`, '操作提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'error'
     }).then(() => {
-      ElMessage.success('注销成功')
+      ElMessage.success('删除成功')
     })
   }
 

@@ -109,8 +109,8 @@
     core: {
       apiFn: fetchGetUserList,
       apiParams: {
-        current: 1,
-        size: 20,
+        // page: 1,
+        // pageSize: 20,
         ...searchForm.value
       },
       // 自定义分页字段映射，未设置时将使用全局配置 tableConfig.ts 中的 paginationKey

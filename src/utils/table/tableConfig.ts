@@ -38,9 +38,9 @@ export const tableConfig = {
   // 列表数据
   recordFields: ['list', 'data', 'records', 'items', 'result', 'rows'],
   // 总条数
-  totalFields: ['total', 'count'],
+  totalFields: ['total', 'count', 'totalCount'],
   // 当前页码
-  currentFields: ['current', 'page', 'pageNum'],
+  currentFields: ['current', 'page', 'pageNum', 'currPage'],
   // 每页大小
   sizeFields: ['size', 'pageSize', 'limit'],
 
@@ -48,8 +48,8 @@ export const tableConfig = {
   // useTable 组合式函数传递分页参数的时候 用 current 跟 size
   paginationKey: {
     // 当前页码
-    current: 'current',
+    current: 'page',
     // 每页大小
-    size: 'size'
+    size: 'pageSize'
   }
 }

@@ -160,5 +160,16 @@ declare namespace Api {
       message?: string
       data?: UserListItem
     }
+
+    /** 删除用户参数 */
+    interface DeleteUserParams {
+      ids: string[]
+    }
+
+    /** 删除用户响应 */
+    interface DeleteUserResponse {
+      success: boolean
+      message?: string
+    }
   }
 }

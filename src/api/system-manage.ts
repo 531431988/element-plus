@@ -55,3 +55,11 @@ export function fetchUpdateUser(params: Api.SystemManage.SaveUserParams) {
     params
   })
 }
+
+// 删除用户
+export function fetchDeleteUser(params: Api.SystemManage.DeleteUserParams) {
+  return request.del<Api.SystemManage.DeleteUserResponse>({
+    url: '/c2m/sys/user/remove',
+    params
+  })
+}

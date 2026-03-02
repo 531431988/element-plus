@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
   import { useTable } from '@/hooks/core/useTable'
-  import { fetchGetUserList } from '@/api/system-manage'
+  import { fetchGetUserList } from '@/api/system/user'
   import UserSearch from '@/views/system/user/modules/user-search.vue'
 
   defineOptions({ name: 'TreeTable' })

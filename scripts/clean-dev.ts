@@ -589,7 +589,7 @@ export default Object.freeze(fastEnterConfig)
 
 // 更新菜单接口
 async function updateMenuApi() {
-  const apiPath = path.resolve(process.cwd(), 'src/api/system-manage.ts')
+  const apiPath = path.resolve(process.cwd(), 'src/api/system/menu.ts')
 
   try {
     const content = await fs.readFile(apiPath, 'utf-8')

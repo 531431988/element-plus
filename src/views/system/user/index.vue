@@ -45,12 +45,16 @@
   import ArtButtonTable from '@/components/core/forms/art-button-table/index.vue'
   import { ACCOUNT_TABLE_DATA } from '@/mock/temp/formData'
   import { useTable } from '@/hooks/core/useTable'
-  import { fetchGetUserList, fetchDeleteUser } from '@/api/system-manage'
+  import {
+    fetchGetUserList,
+    fetchDeleteUser,
+    fetchUpdateUserLocked,
+    fetchUpdateUserUnLocked
+  } from '@/api/system/user'
   import UserSearch from './modules/user-search.vue'
   import UserDialog from './modules/user-dialog.vue'
   import { ElTag, ElMessageBox, ElImage, ElMessage } from 'element-plus'
   import { DialogType } from '@/types'
-  import { fetchUpdateUserLocked, fetchUpdateUserUnLocked } from '@/api/system-manage'
 
   defineOptions({ name: 'User' })
 

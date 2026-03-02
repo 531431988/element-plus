@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-  import { fetchSaveUser, fetchUpdateUser } from '@/api/system-manage'
+  import { fetchSaveUser, fetchUpdateUser } from '@/api/system/user'
   import type { FormInstance, FormRules } from 'element-plus'
 
   interface Props {

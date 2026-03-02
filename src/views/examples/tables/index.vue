@@ -437,7 +437,7 @@
   } from '@element-plus/icons-vue'
   import { ElMessageBox } from 'element-plus'
   import { useTable, CacheInvalidationStrategy } from '@/hooks/core/useTable'
-  import { fetchGetUserList } from '@/api/system-manage'
+  import { fetchGetUserList } from '@/api/system/user'
   import { ACCOUNT_TABLE_DATA } from '@/mock/temp/formData'
   import { getColumnKey } from '@/hooks/core/useTableColumns'
 

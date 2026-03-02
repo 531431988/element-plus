@@ -366,7 +366,9 @@
     padding: 15px 20px 0;
 
     .action-column {
+      display: flex;
       flex: 1;
+      justify-content: flex-end;
       max-width: 100%;
 
       .action-buttons-wrapper {

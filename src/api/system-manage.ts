@@ -39,3 +39,19 @@ export function fetchUpdateUserUnLocked(params: Api.SystemManage.UpdateLockedPar
     params
   })
 }
+
+// 新增用户
+export function fetchSaveUser(params: Api.SystemManage.SaveUserParams) {
+  return request.post<Api.SystemManage.SaveUserResponse>({
+    url: '/c2m/sys/user/save',
+    params
+  })
+}
+
+// 更新用户（编辑）
+export function fetchUpdateUser(params: Api.SystemManage.SaveUserParams) {
+  return request.put<Api.SystemManage.SaveUserResponse>({
+    url: '/c2m/sys/user/update',
+    params
+  })
+}

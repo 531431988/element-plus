@@ -143,5 +143,22 @@ declare namespace Api {
       success: boolean
       message?: string
     }
+
+    /** 保存用户参数 */
+    interface SaveUserParams {
+      id?: number
+      userName: string
+      realName: string
+      mobilePhone: string
+      isLocked: number
+      remark?: string
+    }
+
+    /** 保存用户响应 */
+    interface SaveUserResponse {
+      success: boolean
+      message?: string
+      data?: UserListItem
+    }
   }
 }

@@ -1,32 +1,31 @@
 <template>
   <ElDialog
     v-model="dialogVisible"
-    :title="dialogType === 'add' ? '添加用户' : '编辑用户'"
+    :title="type === 'add' ? '添加用户' : '编辑用户'"
     width="30%"
     align-center
   >
     <ElForm ref="formRef" :model="formData" :rules="rules" label-width="80px">
-      <ElFormItem label="用户名" prop="username">
-        <ElInput v-model="formData.username" placeholder="请输入用户名" />
+      <ElFormItem label="登录账户" prop="userName">
+        <ElInput v-model="formData.userName" placeholder="请输入用户名" />
       </ElFormItem>
-      <ElFormItem label="手机号" prop="phone">
-        <ElInput v-model="formData.phone" placeholder="请输入手机号" />
+      <ElFormItem label="用户名" prop="realName">
+        <ElInput v-model="formData.realName" placeholder="请输入用户名" />
       </ElFormItem>
-      <ElFormItem label="性别" prop="gender">
-        <ElSelect v-model="formData.gender">
-          <ElOption label="男" value="男" />
-          <ElOption label="女" value="女" />
-        </ElSelect>
+      <ElFormItem label="手机号" prop="mobilePhone">
+        <ElInput v-model="formData.mobilePhone" placeholder="请输入手机号" />
       </ElFormItem>
-      <ElFormItem label="角色" prop="role">
-        <ElSelect v-model="formData.role" multiple>
-          <ElOption
-            v-for="role in roleList"
-            :key="role.roleCode"
-            :value="role.roleCode"
-            :label="role.roleName"
-          />
-        </ElSelect>
+      <ElFormItem label="状态" prop="isLocked">
+        <ElSwitch
+          v-model="formData.isLocked"
+          :active-value="0"
+          :inactive-value="1"
+          active-text="启用"
+          inactive-text="禁用"
+        />
+      </ElFormItem>
+      <ElFormItem label="备注">
+        <ElInput type="textarea" v-model="formData.remark" placeholder="请输入备注" />
       </ElFormItem>
     </ElForm>
     <template #footer>
@@ -39,57 +38,48 @@
 </template>
 
 <script setup lang="ts">
-  import { ROLE_LIST_DATA } from '@/mock/temp/formData'
+  import { fetchSaveUser, fetchUpdateUser } from '@/api/system-manage'
   import type { FormInstance, FormRules } from 'element-plus'
 
   interface Props {
-    visible: boolean
     type: string
     userData?: Partial<Api.SystemManage.UserListItem>
   }
 
   interface Emits {
-    (e: 'update:visible', value: boolean): void
     (e: 'submit'): void
   }
 
   const props = defineProps<Props>()
   const emit = defineEmits<Emits>()
 
-  // 角色列表数据
-  const roleList = ref(ROLE_LIST_DATA)
-
-  // 对话框显示控制
-  const dialogVisible = computed({
-    get: () => props.visible,
-    set: (value) => emit('update:visible', value)
-  })
-
-  const dialogType = computed(() => props.type)
+  // 使用 defineModel 实现双向绑定
+  const dialogVisible = defineModel<boolean>('visible', { default: false })
 
   // 表单实例
   const formRef = ref<FormInstance>()
 
   // 表单数据
   const formData = reactive({
-    username: '',
-    phone: '',
-    gender: '男',
-    role: [] as string[]
+    userName: '',
+    realName: '',
+    mobilePhone: '',
+    isLocked: 0,
+    remark: ''
   })
 
   // 表单验证规则
   const rules: FormRules = {
-    username: [
+    userName: [
       { required: true, message: '请输入用户名', trigger: 'blur' },
-      { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
+      { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' },
+      { pattern: /^[a-zA-Z0-9]+$/, message: '只能输入英文或数字', trigger: 'blur' }
     ],
-    phone: [
+    mobilePhone: [
       { required: true, message: '请输入手机号', trigger: 'blur' },
       { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
     ],
-    gender: [{ required: true, message: '请选择性别', trigger: 'blur' }],
-    role: [{ required: true, message: '请选择角色', trigger: 'blur' }]
+    realName: [{ required: true, message: '请输入用户名', trigger: 'blur' }]
   }
 
   /**
@@ -101,10 +91,11 @@
     const row = props.userData
 
     Object.assign(formData, {
-      username: isEdit && row ? row.userName || '' : '',
-      phone: isEdit && row ? row.userPhone || '' : '',
-      gender: isEdit && row ? row.userGender || '男' : '男',
-      role: isEdit && row ? (Array.isArray(row.userRoles) ? row.userRoles : []) : []
+      userName: isEdit && row ? row.userName || '' : '',
+      realName: isEdit && row ? row.realName || '' : '',
+      mobilePhone: isEdit && row ? row.mobilePhone || '' : '',
+      isLocked: isEdit && row ? row.isLocked || 0 : 0,
+      remark: isEdit && row ? row.remark || '' : ''
     })
   }
 
@@ -113,7 +104,7 @@
    * 当对话框打开时初始化表单数据并清除验证状态
    */
   watch(
-    () => [props.visible, props.type, props.userData],
+    () => [dialogVisible.value, props.type, props.userData],
     ([visible]) => {
       if (visible) {
         initFormData()
@@ -127,17 +118,38 @@
 
   /**
    * 提交表单
-   * 验证通过后触发提交事件
+   * 验证通过后调用保存或更新接口
    */
   const handleSubmit = async () => {
     if (!formRef.value) return
 
-    await formRef.value.validate((valid) => {
-      if (valid) {
-        ElMessage.success(dialogType.value === 'add' ? '添加成功' : '更新成功')
-        dialogVisible.value = false
-        emit('submit')
+    const valid = await formRef.value.validate().catch(() => false)
+    if (!valid) return
+
+    try {
+      const isEdit = props.type === 'edit'
+      const params: Api.SystemManage.SaveUserParams = {
+        userName: formData.userName,
+        realName: formData.realName,
+        mobilePhone: formData.mobilePhone,
+        isLocked: formData.isLocked,
+        remark: formData.remark
       }
-    })
+      // 根据类型调用不同接口
+      if (isEdit) {
+        params.id = props.userData.id
+        await fetchUpdateUser(params)
+        ElMessage.success('更新成功')
+      } else {
+        await fetchSaveUser(params)
+        ElMessage.success('添加成功')
+      }
+
+      dialogVisible.value = false
+      emit('submit')
+    } catch (error) {
+      console.error(isEdit ? '更新用户失败:' : '新增用户失败:', error)
+      ElMessage.error(isEdit ? '更新失败，请重试' : '添加失败，请重试')
+    }
   }
 </script>

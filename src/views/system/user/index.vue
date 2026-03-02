@@ -35,7 +35,7 @@
         v-model:visible="dialogVisible"
         :type="dialogType"
         :user-data="currentUserData"
-        @submit="handleDialogSubmit"
+        @submit="refreshData"
       />
     </ElCard>
   </div>
@@ -234,18 +234,6 @@
     }).then(() => {
       ElMessage.success('删除成功')
     })
-  }
-
-  /**
-   * 处理弹窗提交事件
-   */
-  const handleDialogSubmit = async () => {
-    try {
-      dialogVisible.value = false
-      currentUserData.value = {}
-    } catch (error) {
-      console.error('提交失败:', error)
-    }
   }
 
   /**

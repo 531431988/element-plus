@@ -1,65 +1,16 @@
-import request from '@/utils/http'
-import { AppRouteRecord } from '@/types/router'
+/**
+ * 系统管理模块 API 统一导出
+ *
+ * 按照 views/system 目录结构组织，统一从这里导出
+ *
+ * @module api/system-manage
+ */
 
-// 获取用户列表
-export function fetchGetUserList(params: Api.SystemManage.UserSearchParams) {
-  return request.get<Api.SystemManage.UserList>({
-    url: '/c2m/sys/user/page',
-    params
-  })
-}
+// 用户相关接口
+export * from './system/user'
 
-// 获取角色列表
-export function fetchGetRoleList(params: Api.SystemManage.RoleSearchParams) {
-  return request.get<Api.SystemManage.RoleList>({
-    url: '/api/role/list',
-    params
-  })
-}
+// 角色相关接口
+export * from './system/role'
 
-// 获取菜单列表
-export function fetchGetMenuList() {
-  return request.get<AppRouteRecord[]>({
-    url: '/c2m/menu/all'
-  })
-}
-
-// 更新用户锁定状态（启用）
-export function fetchUpdateUserLocked(params: Api.SystemManage.UpdateLockedParams) {
-  return request.post<Api.SystemManage.UpdateLockedResponse>({
-    url: '/c2m/sys/user/locked',
-    params
-  })
-}
-
-// 更新用户解锁状态（禁用）
-export function fetchUpdateUserUnLocked(params: Api.SystemManage.UpdateLockedParams) {
-  return request.post<Api.SystemManage.UpdateLockedResponse>({
-    url: '/c2m/sys/user/unLocked',
-    params
-  })
-}
-
-// 新增用户
-export function fetchSaveUser(params: Api.SystemManage.SaveUserParams) {
-  return request.post<Api.SystemManage.SaveUserResponse>({
-    url: '/c2m/sys/user/save',
-    params
-  })
-}
-
-// 更新用户（编辑）
-export function fetchUpdateUser(params: Api.SystemManage.SaveUserParams) {
-  return request.put<Api.SystemManage.SaveUserResponse>({
-    url: '/c2m/sys/user/update',
-    params
-  })
-}
-
-// 删除用户
-export function fetchDeleteUser(params: Api.SystemManage.DeleteUserParams) {
-  return request.del<Api.SystemManage.DeleteUserResponse>({
-    url: '/c2m/sys/user/remove',
-    params
-  })
-}
+// 菜单相关接口
+export * from './system/menu'

@@ -88,8 +88,8 @@
 
 @mixin art-card-base($border-color, $shadow: none, $radius-diff: 4px) {
   background: var(--default-box-color);
-  border: 1px solid #{$border-color} !important;
-  border-radius: calc(var(--custom-radius) + #{$radius-diff}) !important;
+  //border: 1px solid #{$border-color} !important;
+  //border-radius: calc(var(--custom-radius) + #{$radius-diff}) !important;
   box-shadow: #{$shadow} !important;
 
   --el-card-border-color: var(--default-border) !important;
@@ -98,14 +98,14 @@
 .art-card,
 .art-card-sm,
 .art-card-xs {
-  border: 1px solid var(--art-card-border);
+  // border: 1px solid var(--art-card-border);
 }
 
 // 盒子边框
 [data-box-mode='border-mode'] {
   .page-content,
   .art-table-card {
-    border: 1px solid var(--art-card-border) !important;
+    // border: 1px solid var(--art-card-border) !important;
   }
 
   .art-card {
@@ -130,7 +130,7 @@
   }
 
   .layout-sidebar {
-    border-right: 1px solid var(--art-card-border) !important;
+    // border-right: 1px solid var(--art-card-border) !important;
   }
 
   .art-card {
@@ -181,7 +181,8 @@
   display: flex;
   flex-direction: column;
   margin-top: 12px;
-  border-radius: calc(var(--custom-radius) / 2 + 2px) !important;
+  // border-radius: calc(var(--custom-radius) / 2 + 2px) !important;
+  border: none !important;
 
   .el-card__body {
     height: 100%;

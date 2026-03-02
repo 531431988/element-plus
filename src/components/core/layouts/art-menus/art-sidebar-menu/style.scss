@@ -3,7 +3,7 @@
   height: 100vh;
   user-select: none;
   scrollbar-width: none;
-  border-right: 1px solid var(--art-card-border);
+  // border-right: 1px solid var(--art-card-border);
 
   &.no-border {
     border-right: none !important;
@@ -240,7 +240,7 @@
 
 .dark {
   .layout-sidebar {
-    border-right: 1px solid rgb(255 255 255 / 13%);
+    // border-right: 1px solid rgb(255 255 255 / 13%);
 
     :deep(.el-scrollbar__thumb) {
       background-color: #777;

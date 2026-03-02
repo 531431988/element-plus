@@ -43,8 +43,8 @@
    * 角色状态选项
    */
   const statusOptions = ref([
-    { label: '启用', value: true },
-    { label: '禁用', value: false }
+    { label: '启用', value: 1 },
+    { label: '禁用', value: 0 }
   ])
 
   /**
@@ -53,23 +53,9 @@
   const formItems = computed(() => [
     {
       label: '角色名称',
-      key: 'roleName',
+      key: 'name',
       type: 'input',
       placeholder: '请输入角色名称',
-      clearable: true
-    },
-    {
-      label: '角色编码',
-      key: 'roleCode',
-      type: 'input',
-      placeholder: '请输入角色编码',
-      clearable: true
-    },
-    {
-      label: '角色描述',
-      key: 'description',
-      type: 'input',
-      placeholder: '请输入角色描述',
       clearable: true
     },
     {
@@ -81,8 +67,8 @@
         options: statusOptions.value,
         clearable: true
       }
-    },
-    {
+    }
+    /* {
       label: '创建日期',
       key: 'daterange',
       type: 'datetime',
@@ -100,7 +86,7 @@
           { text: '最近一个月', value: [new Date(Date.now() - 2592000000), new Date()] }
         ]
       }
-    }
+    } */
   ])
 
   /**

@@ -230,7 +230,7 @@
    * 删除用户
    */
   const deleteUser = (row: UserListItem): void => {
-    ElMessageBox.confirm(`确定要删除该用户吗？`, '操作提示', {
+    ElMessageBox.confirm(`确定要删除该用户吗？`, '删除确认', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'error'

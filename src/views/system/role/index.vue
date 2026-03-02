@@ -21,7 +21,7 @@
       >
         <template #left>
           <ElSpace wrap>
-            <ElButton @click="showDialog('add')" v-ripple>新增角色</ElButton>
+            <ElButton type="primary" @click="showDialog('add')" v-ripple>新增角色</ElButton>
           </ElSpace>
         </template>
       </ArtTableHeader>
@@ -58,12 +58,17 @@
 <script setup lang="ts">
   import { ButtonMoreItem } from '@/components/core/forms/art-button-more/index.vue'
   import { useTable } from '@/hooks/core/useTable'
-  import { fetchGetRoleList } from '@/api/system/role'
+  import {
+    fetchGetRoleList,
+    fetchEnableRole,
+    fetchDisableRole,
+    fetchDeleteRole
+  } from '@/api/system/role'
   import ArtButtonMore from '@/components/core/forms/art-button-more/index.vue'
   import RoleSearch from './modules/role-search.vue'
   import RoleEditDialog from './modules/role-edit-dialog.vue'
   import RolePermissionDialog from './modules/role-permission-dialog.vue'
-  import { ElTag, ElMessageBox } from 'element-plus'
+  import { ElTag, ElMessageBox, ElSwitch, ElMessage } from 'element-plus'
 
   defineOptions({ name: 'Role' })
 
@@ -71,14 +76,11 @@
 
   // 搜索表单
   const searchForm = ref({
-    roleName: undefined,
-    roleCode: undefined,
-    description: undefined,
-    enabled: undefined,
-    daterange: undefined
+    name: undefined,
+    enabled: undefined
   })
 
-  const showSearchBar = ref(false)
+  const showSearchBar = ref(true)
 
   const dialogVisible = ref(false)
   const permissionDialog = ref(false)
@@ -101,46 +103,51 @@
     core: {
       apiFn: fetchGetRoleList,
       apiParams: {
-        current: 1,
-        size: 20
+        page: 1,
+        pageSize: 10
       },
       // 排除 apiParams 中的属性
       excludeParams: ['daterange'],
       columnsFactory: () => [
         {
-          prop: 'roleId',
-          label: '角色ID',
-          width: 100
-        },
-        {
-          prop: 'roleName',
+          prop: 'name',
           label: '角色名称',
           minWidth: 120
         },
         {
-          prop: 'roleCode',
+          prop: 'code',
           label: '角色编码',
-          minWidth: 120
-        },
-        {
-          prop: 'description',
-          label: '角色描述',
           minWidth: 150,
           showOverflowTooltip: true
+        },
+        {
+          prop: 'roleType',
+          label: '角色类型'
         },
         {
           prop: 'enabled',
           label: '角色状态',
           width: 100,
           formatter: (row) => {
-            const statusConfig = row.enabled
-              ? { type: 'success', text: '启用' }
-              : { type: 'warning', text: '禁用' }
-            return h(
-              ElTag,
-              { type: statusConfig.type as 'success' | 'warning' },
-              () => statusConfig.text
-            )
+            return h(ElSwitch, {
+              modelValue: row.enabled,
+              'inline-prompt': true,
+              'active-text': '启用',
+              'inactive-text': '禁用',
+              'active-value': 1,
+              'inactive-value': 0,
+              'onUpdate:modelValue': async (val: boolean) => {
+                try {
+                  const params = { id: String(row.id) }
+                  val ? await fetchEnableRole(params) : await fetchDisableRole(params)
+                  ElMessage.success('操作成功')
+                  refreshData()
+                } catch (error) {
+                  console.error('角色状态更新失败:', error)
+                  ElMessage.error('操作失败，请重试')
+                }
+              }
+            })
           }
         },
         {
@@ -225,18 +232,21 @@
   }
 
   const deleteRole = (row: RoleListItem) => {
-    ElMessageBox.confirm(`确定删除角色"${row.roleName}"吗？此操作不可恢复！`, '删除确认', {
+    ElMessageBox.confirm(`确定删除该角色吗？`, '删除确认', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
-      .then(() => {
-        // TODO: 调用删除接口
-        ElMessage.success('删除成功')
-        refreshData()
+      .then(async () => {
+        try {
+          await fetchDeleteRole({ ids: [String(row.id)] })
+          ElMessage.success('删除成功')
+          refreshData()
+        } catch (error) {
+          console.error('删除角色失败:', error)
+          ElMessage.error('删除失败，请重试')
+        }
       })
-      .catch(() => {
-        ElMessage.info('已取消删除')
-      })
+      .catch(() => {})
   }
 </script>

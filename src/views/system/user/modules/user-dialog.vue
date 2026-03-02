@@ -21,7 +21,7 @@
           :active-value="0"
           :inactive-value="1"
           active-text="启用"
-          inactive-text="禁用"
+          inactive-text="停用"
         />
       </ElFormItem>
       <ElFormItem label="备注">

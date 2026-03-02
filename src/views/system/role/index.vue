@@ -133,7 +133,7 @@
               modelValue: row.enabled,
               'inline-prompt': true,
               'active-text': '启用',
-              'inactive-text': '禁用',
+              'inactive-text': '停用',
               'active-value': 1,
               'inactive-value': 0,
               'onUpdate:modelValue': async (val: boolean) => {

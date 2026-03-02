@@ -171,5 +171,25 @@ declare namespace Api {
       success: boolean
       message?: string
     }
+
+    /** 保存角色参数 */
+    interface SaveRoleParams {
+      roleName: string
+      roleCode: string
+      description?: string
+      enabled: boolean
+    }
+
+    /** 更新角色参数 */
+    interface UpdateRoleParams extends SaveRoleParams {
+      roleId: number
+    }
+
+    /** 保存角色响应 */
+    interface SaveRoleResponse {
+      success: boolean
+      message?: string
+      data?: RoleListItem
+    }
   }
 }

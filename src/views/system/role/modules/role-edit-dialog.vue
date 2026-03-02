@@ -7,22 +7,21 @@
     @close="handleClose"
   >
     <ElForm ref="formRef" :model="form" :rules="rules" label-width="120px">
-      <ElFormItem label="角色名称" prop="roleName">
-        <ElInput v-model="form.roleName" placeholder="请输入角色名称" />
+      <ElFormItem label="角色名称" prop="name">
+        <ElInput v-model="form.name" placeholder="请输入角色名称" />
       </ElFormItem>
-      <ElFormItem label="角色编码" prop="roleCode">
-        <ElInput v-model="form.roleCode" placeholder="请输入角色编码" />
+      <ElFormItem label="角色类型" prop="roleType"> </ElFormItem>
+      <ElFormItem label="角色描述" prop="remark">
+        <ElInput v-model="form.remark" type="textarea" :rows="3" placeholder="请输入角色描述" />
       </ElFormItem>
-      <ElFormItem label="描述" prop="description">
-        <ElInput
-          v-model="form.description"
-          type="textarea"
-          :rows="3"
-          placeholder="请输入角色描述"
+      <ElFormItem label="状态">
+        <ElSwitch
+          v-model="form.enabled"
+          :active-value="1"
+          :inactive-value="0"
+          active-text="启用"
+          inactive-text="停用"
         />
-      </ElFormItem>
-      <ElFormItem label="启用">
-        <ElSwitch v-model="form.enabled" />
       </ElFormItem>
     </ElForm>
     <template #footer>
@@ -33,7 +32,10 @@
 </template>
 
 <script setup lang="ts">
+  import { fetchSaveRole, fetchUpdateRole } from '@/api/system/role'
   import type { FormInstance, FormRules } from 'element-plus'
+  import { ElMessage, ElSelect, ElOption, ElInput } from 'element-plus'
+  import { ref, reactive, computed, watch, nextTick } from 'vue'
 
   type RoleListItem = Api.SystemManage.RoleListItem
 
@@ -70,27 +72,22 @@
    * 表单验证规则
    */
   const rules = reactive<FormRules>({
-    roleName: [
+    name: [
       { required: true, message: '请输入角色名称', trigger: 'blur' },
       { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
     ],
-    roleCode: [
-      { required: true, message: '请输入角色编码', trigger: 'blur' },
-      { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
-    ],
-    description: [{ required: true, message: '请输入角色描述', trigger: 'blur' }]
+    roleCode: [{ required: true, message: '请输入角色编码', trigger: 'blur' }]
   })
 
   /**
    * 表单数据
    */
-  const form = reactive<RoleListItem>({
-    roleId: 0,
-    roleName: '',
-    roleCode: '',
-    description: '',
-    createTime: '',
-    enabled: true
+  const form = reactive({
+    id: 0,
+    name: '',
+    roleType: 1,
+    remark: '',
+    enabled: 1
   })
 
   /**
@@ -99,7 +96,12 @@
   watch(
     () => props.modelValue,
     (newVal) => {
-      if (newVal) initForm()
+      if (newVal) {
+        initForm()
+        nextTick(() => {
+          formRef.value?.clearValidate()
+        })
+      }
     }
   )
 
@@ -109,7 +111,9 @@
   watch(
     () => props.roleData,
     (newData) => {
-      if (newData && props.modelValue) initForm()
+      if (newData && props.modelValue) {
+        initForm()
+      }
     },
     { deep: true }
   )
@@ -120,15 +124,20 @@
    */
   const initForm = () => {
     if (props.dialogType === 'edit' && props.roleData) {
-      Object.assign(form, props.roleData)
+      Object.assign(form, {
+        id: props.roleData.id || 0,
+        name: props.roleData.name || '',
+        roleType: props.roleData.roleType || 1,
+        remark: props.roleData.remark || '',
+        enabled: props.roleData.enabled || 0
+      })
     } else {
       Object.assign(form, {
-        roleId: 0,
-        roleName: '',
-        roleCode: '',
-        description: '',
-        createTime: '',
-        enabled: true
+        id: 0,
+        name: '',
+        roleType: 1,
+        remark: '',
+        enabled: 1
       })
     }
   }
@@ -143,20 +152,36 @@
 
   /**
    * 提交表单
-   * 验证通过后调用接口保存数据
+   * 验证通过后调用新增或更新接口
    */
   const handleSubmit = async () => {
     if (!formRef.value) return
 
+    const valid = await formRef.value.validate().catch(() => false)
+    if (!valid) return
+
     try {
-      await formRef.value.validate()
-      // TODO: 调用新增/编辑接口
-      const message = props.dialogType === 'add' ? '新增成功' : '修改成功'
-      ElMessage.success(message)
+      const isEdit = props.dialogType === 'edit'
+      const params: Api.SystemManage.SaveRoleParams = {
+        name: form.name,
+        roleType: form.roleType,
+        remark: form.remark,
+        enabled: form.enabled
+      }
+
+      if (isEdit) {
+        await fetchUpdateRole({ ...params, id: form.id })
+        ElMessage.success('修改成功')
+      } else {
+        await fetchSaveRole(params)
+        ElMessage.success('新增成功')
+      }
+
       emit('success')
       handleClose()
     } catch (error) {
-      console.log('表单验证失败:', error)
+      console.error(isEdit ? '更新角色失败:' : '新增角色失败:', error)
+      ElMessage.error(isEdit ? '更新失败，请重试' : '新增失败，请重试')
     }
   }
 </script>

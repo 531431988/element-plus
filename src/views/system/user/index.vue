@@ -141,7 +141,7 @@
               modelValue: row.isLocked,
               'inline-prompt': true,
               'active-text': '启用',
-              'inactive-text': '禁用',
+              'inactive-text': '停用',
               'active-value': 0,
               'inactive-value': 1,
               'onUpdate:modelValue': async (val: boolean) => {

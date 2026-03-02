@@ -175,9 +175,9 @@ declare namespace Api {
     /** 保存角色参数 */
     interface SaveRoleParams {
       roleName: string
-      roleCode: string
-      description?: string
-      enabled: boolean
+      roleType: string
+      remark?: string
+      enabled: number
     }
 
     /** 更新角色参数 */
@@ -191,5 +191,40 @@ declare namespace Api {
       message?: string
       data?: RoleListItem
     }
+
+    /** 字典分类列表项 */
+    interface DictTypeListItem {
+      id: number
+      dictName: string
+      dictType: string
+      status: number
+      remark?: string
+      createTime: string
+      children?: DictTypeListItem[]
+    }
+
+    /** 字典分类列表 */
+    type DictTypeList = Api.Common.PaginatedResponse<DictTypeListItem>
+
+    /** 字典分类搜索参数 */
+    type DictTypeSearchParams = Partial<
+      Pick<DictTypeListItem, 'id' | 'dictName' | 'dictType' | 'status'> &
+        Api.Common.CommonSearchParams
+    >
+
+    /** 字典项列表项 */
+    interface DictItemListItem {
+      id: number
+      dictId: number
+      itemText: string
+      itemValue: string
+      status: number
+      sort: number
+      remark?: string
+      createTime: string
+    }
+
+    /** 字典项列表 */
+    type DictItemList = Api.Common.PaginatedResponse<DictItemListItem>
   }
 }

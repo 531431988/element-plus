@@ -136,16 +136,13 @@
               'inactive-text': '停用',
               'active-value': 1,
               'inactive-value': 0,
-              'onUpdate:modelValue': async (val: boolean) => {
+              'onUpdate:modelValue': async (val: number) => {
                 try {
                   const params = { id: String(row.id) }
                   val ? await fetchEnableRole(params) : await fetchDisableRole(params)
                   ElMessage.success('操作成功')
                   refreshData()
-                } catch (error) {
-                  console.error('角色状态更新失败:', error)
-                  ElMessage.error('操作失败，请重试')
-                }
+                } catch (error) {}
               }
             })
           }

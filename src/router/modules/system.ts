@@ -61,6 +61,22 @@ export const systemRoutes: AppRouteRecord = {
       }
     },
     {
+      path: 'dict',
+      name: 'Dict',
+      component: '/system/dict',
+      meta: {
+        title: 'menus.system.dict',
+        icon: 'ri:menu-line',
+        keepAlive: true,
+        roles: ['R_SUPER'],
+        authList: [
+          { title: '新增', authMark: 'add' },
+          { title: '编辑', authMark: 'edit' },
+          { title: '删除', authMark: 'delete' }
+        ]
+      }
+    },
+    {
       path: 'nested',
       name: 'Nested',
       component: '',

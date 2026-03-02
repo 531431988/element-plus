@@ -150,9 +150,7 @@
                   val ? await fetchUpdateUserLocked(params) : await fetchUpdateUserUnLocked(params)
                   ElMessage.success('操作成功')
                   refreshData()
-                } catch (error) {
-                  ElMessage.error('操作失败，请重试')
-                }
+                } catch (error) {}
               }
             })
           }

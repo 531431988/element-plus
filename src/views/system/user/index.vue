@@ -67,31 +67,10 @@
   // 搜索表单
   const searchForm = ref({
     userName: undefined,
-    userGender: undefined,
+    mobilePhone: undefined,
     userPhone: undefined,
-    userEmail: undefined,
-    status: '1'
+    isLocked: null
   })
-
-  // 用户状态配置
-  const USER_STATUS_CONFIG = {
-    '1': { type: 'success' as const, text: '在线' },
-    '2': { type: 'info' as const, text: '离线' },
-    '3': { type: 'warning' as const, text: '异常' },
-    '4': { type: 'danger' as const, text: '注销' }
-  } as const
-
-  /**
-   * 获取用户状态配置
-   */
-  const getUserStatusConfig = (status: string) => {
-    return (
-      USER_STATUS_CONFIG[status as keyof typeof USER_STATUS_CONFIG] || {
-        type: 'info' as const,
-        text: '未知'
-      }
-    )
-  }
 
   const {
     columns,
@@ -120,23 +99,22 @@
       //   size: 'pageSize'
       // },
       columnsFactory: () => [
-        { type: 'selection' }, // 勾选列
+        // { type: 'selection' }, // 勾选列
         { type: 'index', width: 60, label: '序号' }, // 序号
         { label: '账户', prop: 'userName' },
         {
-          prop: 'userInfo',
+          prop: 'realName',
           label: '用户名',
-          width: 280,
           // visible: false, // 默认是否显示列
           formatter: (row) => {
             return h('div', { class: 'user flex-c' }, [
-              h(ElImage, {
+              /*  h(ElImage, {
                 class: 'size-9.5 rounded-md',
                 src: row.avatar,
                 previewSrcList: [row.avatar],
                 // 图片预览是否插入至 body 元素上，用于解决表格内部图片预览样式异常
                 previewTeleported: true
-              }),
+              }), */
               h('div', { class: 'ml-2' }, [
                 h('p', { class: 'user-name' }, row.userName),
                 h('p', { class: 'email' }, row.userEmail)
@@ -150,7 +128,7 @@
           sortable: true,
           formatter: (row) => row.userGender
         }, */
-        { prop: 'userPhone', label: '手机号' },
+        { prop: 'mobilePhone', label: '手机号' },
         {
           prop: 'isLocked',
           label: '状态',

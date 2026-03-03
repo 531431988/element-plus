@@ -3,6 +3,8 @@
   import { useRoute, useRouter } from 'vue-router'
   import logo from '@imgs/common/logo.webp'
   defineOptions({ name: 'ArtAgentAside' })
+  const collapsed = useLocalStorage(COLLAPSED, false)
+
   const route = useRoute()
   const router = useRouter()
 
@@ -82,25 +84,24 @@
 </script>
 
 <template>
-  <el-aside width="200px">
+  <el-aside width="200px" v-if="collapsed">
     <div class="aside-container">
       <div class="aside-wrapper">
         <div class="aside-header">
-          <div class="flex items-center gap-8px hover:cursor-pointer" @click="handleCreatChat">
+          <div class="flex-center gap-2 hover:cursor-pointer" @click="handleCreatChat">
             <el-image :src="logo" alt="logo" fit="cover" class="logo-img" />
-            <span class="logo-text max-w-150px text-overflow">Element Plus X</span>
+            <span class="logo-text max-w-30 text-overflow">Element Plus X</span>
           </div>
-          <!-- <Collapse class="ml-auto" /> -->
+          <ElButton link v-if="collapsed" @click="collapsed = !collapsed">
+            <ArtSvgIcon icon="mingcute:layout-leftbar-close-line" class="text-xl" />
+          </ElButton>
         </div>
 
         <div class="aside-body">
           <div class="creat-chat-btn-wrapper">
             <div class="creat-chat-btn" @click="handleCreatChat">
-              <el-icon class="add-icon">
-                <Plus />
-              </el-icon>
+              <ArtSvgIcon icon="mdi:plus" class="text-xl" />
               <span class="creat-chat-text">新对话</span>
-              <!--  <SvgIcon name="ctrl+k" size="37" /> -->
             </div>
           </div>
 
@@ -164,6 +165,7 @@
       .aside-header {
         display: flex;
         align-items: center;
+        justify-content: space-between;
         height: 36px;
         margin: 10px 12px 0;
 

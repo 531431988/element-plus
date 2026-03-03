@@ -70,8 +70,9 @@ export default ({ mode }: { mode: string }) => {
       tailwindcss(),
       // 自动按需导入 API
       AutoImport({
-        imports: ['vue', 'vue-router', 'pinia', '@vueuse/core'],
+        imports: ['vue', 'vue-router', 'pinia', '@vueuse/head', '@vueuse/core'],
         dts: 'src/types/import/auto-imports.d.ts',
+        dirs: ['src/config/cache.ts'],
         resolvers: [ElementPlusResolver()],
         eslintrc: {
           enabled: true,

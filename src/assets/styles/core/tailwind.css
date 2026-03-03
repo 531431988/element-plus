@@ -187,6 +187,18 @@
 
 /* ==================== Custom Component Classes ==================== */
 @layer components {
+  .flex-col {
+    @apply flex flex-col;
+  }
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+  .flex-x-center {
+    @apply flex justify-center;
+  }
+  .flex-y-center {
+    @apply flex items-center;
+  }
   /* Art Card Header Component */
   .art-card-header {
     @apply flex justify-between pr-6 pb-1;
@@ -204,5 +216,8 @@
         }
       }
     }
+  }
+  .art-agent-menu-item {
+    @apply flex items-center gap-1 p-2 rounded-md cursor-pointer text-sm hover:bg-black/5;
   }
 }

@@ -20,7 +20,7 @@
   )
   const popoverList = computed(() => modelStore.modelList)
   const buttonRef = ref()
-  const popoverRef = ref<PopoverInstance>()
+  const popoverRef = ref()
   const onClickOutside = () => {
     popoverRef.value?.hide()
   }
@@ -42,9 +42,10 @@
       <div
         v-for="item in popoverList"
         :key="item.id"
-        class="art-agent-menu-item text-overflow select-none transition-all transition-duration-300 hover:cursor-pointer" :class="{ 'bg-black/5 is-select': item.modelName === currentModelName }"
+        class="art-agent-menu-item text-overflow select-none transition-all transition-duration-300 hover:cursor-pointer"
+        :class="{ 'bg-black/5 is-select': item.modelName === currentModelName }"
       >
-      {{ item.modelName }}
+        {{ item.modelName }}
       </div>
     </ElPopover>
   </div>

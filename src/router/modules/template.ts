@@ -79,28 +79,6 @@ export const templateRoutes: AppRouteRecord = {
         keepAlive: true,
         isFullPage: true
       }
-    },
-    {
-      path: 'agent',
-      name: 'Agent',
-      component: '/template/agent/index',
-      meta: {
-        title: '智能体',
-        icon: 'ri:apps-2-line'
-      },
-      children: [
-        {
-          path: 'chat',
-          name: 'Chat',
-          component: '/template/agent/chat',
-          meta: {
-            title: '智能体对话',
-            icon: 'ri:message-3-line',
-            keepAlive: true,
-            isFullPage: true
-          }
-        }
-      ]
     }
   ]
 }

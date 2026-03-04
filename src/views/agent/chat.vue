@@ -1,16 +1,44 @@
 <script setup lang="ts">
-  import { Sender, Attachments, BubbleList, Typewriter } from 'vue-element-plus-x'
-  import { useRoute } from 'vue-router'
+  import {
+    Sender,
+    Attachments,
+    BubbleList,
+    Typewriter,
+    XMarkdown,
+    useXStream
+  } from 'vue-element-plus-x'
+  import { ref, computed, watch, nextTick } from 'vue'
+  import { debounce } from 'lodash-es'
   import FilesSelect from './modules/FilesSelect.vue'
   import ModelSelect from './modules/ModelSelect.vue'
-  import { useChatStore } from '@stores/modules/chat'
   import { useFilesStore } from '@stores/modules/files'
-  import { useModelStore } from '@stores/modules/model'
   import { useUserStore } from '@stores/modules/user'
 
-  const route = useRoute()
-  const chatStore = useChatStore()
-  const modelStore = useModelStore()
+  // 类型定义
+  interface MessageItem {
+    key: number
+    avatar: string
+    avatarSize: string
+    role: 'user' | 'system'
+    placement: 'start' | 'end'
+    isMarkdown: boolean
+    loading: boolean
+    content: string
+    reasoning_content: string
+    thinkingStatus: 'start' | 'loading' | 'end'
+    thinlCollapse: boolean
+    noStyle: boolean
+    typing?: boolean
+  }
+
+  // 配置
+  const CONFIG = {
+    API_URL: 'http://192.168.120.39:8090/v1/chat-messages',
+    API_KEY: 'app-NVz8xJbVqDKqoCN7nWo7ml24',
+    SCROLL_DELAY: 350,
+    USER_ID: 'abc-123'
+  }
+
   const filesStore = useFilesStore()
   const userStore = useUserStore()
 
@@ -22,149 +50,120 @@
 
   const inputValue = ref('')
   const senderRef = ref<InstanceType<typeof Sender> | null>(null)
-  const bubbleItems = ref([])
+  const bubbleItems = ref<MessageItem[]>([])
   const bubbleListRef = ref(null)
 
-  /* const {
-    stream,
-    loading: isLoading,
-    cancel
-  } = useHookFetch({
-    request: send,
-    onError: (err) => {
-      console.warn('测试错误拦截', err)
+  // 使用 useXStream 处理流式请求
+  const { startStream, cancel, isLoading, data, error } = useXStream()
+  console.log('useXStream error', error.value)
+  // 防抖处理滚动
+  const scrollToBottom = debounce(() => {
+    bubbleListRef.value?.scrollToBottom()
+  }, 100)
+
+  watchEffect(() => {
+    let content = ''
+    let isMessageEnd = false
+
+    if (data.value.length) {
+      content = data.value.reduce((text, chunkItem) => {
+        try {
+          const parsedChunk = JSON.parse(chunkItem.data)
+          switch (parsedChunk.event) {
+            case 'message_end':
+              isMessageEnd = true
+              return text
+            case 'node_finished':
+            case 'node_started':
+            case 'workflow_started':
+            case 'iteration_started':
+            case 'iteration_next':
+            case 'iteration_completed':
+              break
+            case 'error':
+              break
+            case 'message':
+              if (parsedChunk.answer) return text + parsedChunk.answer
+              break
+            default:
+              console.log('未知事件类型:', parsedChunk.event)
+          }
+        } catch (error) {
+          console.error('解析数据时出错:', error)
+        }
+        return text
+      }, '')
     }
-  }) */
-  // 记录进入思考中
-  let isThinking = false
 
-  watch(
-    () => route.params?.id,
-    async (_id_) => {
-      if (_id_) {
-        if (_id_ !== 'not_login') {
-          // 判断的当前会话id是否有聊天记录，有缓存则直接赋值展示
-          if (chatStore.chatMap[`${_id_}`] && chatStore.chatMap[`${_id_}`].length) {
-            bubbleItems.value = chatStore.chatMap[`${_id_}`]
-            // 滚动到底部
-            setTimeout(() => {
-              bubbleListRef.value!.scrollToBottom()
-            }, 350)
-            return
-          }
-
-          // 无缓存则请求聊天记录
-          await chatStore.requestChatList(`${_id_}`)
-          // 请求聊天记录后，赋值回显，并滚动到底部
-          bubbleItems.value = chatStore.chatMap[`${_id_}`]
-
-          // 滚动到底部
-          setTimeout(() => {
-            bubbleListRef.value!.scrollToBottom()
-          }, 350)
-        }
-
-        // 如果本地有发送内容 ，则直接发送
-        const v = localStorage.getItem('chatContent')
-        if (v) {
-          // 发送消息
-          console.log('发送消息 v', v)
-          setTimeout(() => {
-            startSSE(v)
-          }, 350)
-
-          localStorage.removeItem('chatContent')
-        }
-      }
-    },
-    { immediate: true, deep: true }
-  )
-
-  // 封装数据处理逻辑
-  function handleDataChunk(chunk) {
-    try {
-      const reasoningChunk = chunk.choices?.[0].delta.reasoning_content
-      if (reasoningChunk) {
-        // 开始思考链状态
-        bubbleItems.value[bubbleItems.value.length - 1].thinkingStatus = 'thinking'
-        bubbleItems.value[bubbleItems.value.length - 1].loading = true
-        bubbleItems.value[bubbleItems.value.length - 1].thinlCollapse = true
-        if (bubbleItems.value.length) {
-          bubbleItems.value[bubbleItems.value.length - 1].reasoning_content += reasoningChunk
-        }
+    // 直接修改最后一个元素
+    if (bubbleItems.value.length) {
+      const lastIndex = bubbleItems.value.length - 1
+      const shouldCloseLoading = content || isMessageEnd
+      bubbleItems.value[lastIndex] = {
+        ...bubbleItems.value[lastIndex],
+        content,
+        loading: !shouldCloseLoading
       }
 
-      // 另一种思考中形式，content中有 <think></think> 的格式
-      // 一开始匹配到 <think> 开始，匹配到 </think> 结束，并处理标签中的内容为思考内容
-      const parsedChunk = chunk.choices?.[0].delta.content
-      if (parsedChunk) {
-        const thinkStart = parsedChunk.includes('<think>')
-        const thinkEnd = parsedChunk.includes('</think>')
-        if (thinkStart) {
-          isThinking = true
-        }
-        if (thinkEnd) {
-          isThinking = false
-        }
-        if (isThinking) {
-          // 开始思考链状态
-          bubbleItems.value[bubbleItems.value.length - 1].thinkingStatus = 'thinking'
-          bubbleItems.value[bubbleItems.value.length - 1].loading = true
-          bubbleItems.value[bubbleItems.value.length - 1].thinlCollapse = true
-          if (bubbleItems.value.length) {
-            bubbleItems.value[bubbleItems.value.length - 1].reasoning_content += parsedChunk
-              .replace('<think>', '')
-              .replace('</think>', '')
-          }
-        } else {
-          // 结束 思考链状态
-          bubbleItems.value[bubbleItems.value.length - 1].thinkingStatus = 'end'
-          bubbleItems.value[bubbleItems.value.length - 1].loading = false
-          if (bubbleItems.value.length) {
-            bubbleItems.value[bubbleItems.value.length - 1].content += parsedChunk
-          }
-        }
+      // 只有当有内容变化时才滚动和输出日志
+      if (content) {
+        scrollToBottom()
+        console.log('Current answer:', content)
       }
-    } catch (err) {
-      // 这里如果使用了中断，会有报错，可以忽略不管
-      console.error('解析数据时出错:', err)
     }
+  })
+  // 网络请求函数
+  async function fetchChatResponse(content: string) {
+    const response = await fetch(CONFIG.API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${CONFIG.API_KEY}`
+      },
+      body: JSON.stringify({
+        inputs: {},
+        query: content,
+        response_mode: 'streaming',
+        conversation_id: null,
+        user: CONFIG.USER_ID
+      })
+    })
+    return response
   }
 
-  // 封装错误处理逻辑
-  function handleError(err: any) {
-    console.error('Fetch error:', err)
-  }
+  /**
+   * 发送请求并处理流式连接
+   * @async
+   * @function startSSE
+   * @description 建立与服务器的流式连接，接收AI回答并实时更新UI
+   */
+  const startSSE = async (content = inputValue.value) => {
+    if (!content) return
+    // 插入用户消息
+    addMessage(content, true)
 
-  async function startSSE(chatContent: string) {
+    // 添加AI回答占位符
+    addMessage('', false)
+
+    // 滚动到底部
+    scrollToBottom()
+
+    // 重置输入
+    inputValue.value = ''
+
     try {
-      // 添加用户输入的消息
-      // console.log('chatContent', chatContent);
-      // 清空输入框
-      inputValue.value = ''
-      addMessage(chatContent, true)
-      addMessage('', false)
+      // 开始流式请求
+      const response = await fetchChatResponse(content)
 
-      // 这里有必要调用一下 BubbleList 组件的滚动到底部 手动触发 自动滚动
-      bubbleListRef.value?.scrollToBottom()
-
-      for await (const chunk of stream({
-        messages: bubbleItems.value
-          .filter((item: any) => item.role === 'user')
-          .map((item: any) => ({
-            role: item.role,
-            content: item.content
-          })),
-        sessionId: route.params?.id !== 'not_login' ? String(route.params?.id) : undefined,
-        userId: userStore.userInfo?.userId,
-        model: modelStore.currentModelInfo.modelName ?? ''
-      })) {
-        handleDataChunk(chunk.result)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
-    } catch (err) {
-      handleError(err)
-    } finally {
-      console.log('数据接收完毕')
+
+      startStream({
+        readableStream: response.body
+      })
+    } catch (error) {
+      console.error('请求错误:', error)
       // 停止打字器状态
       if (bubbleItems.value.length) {
         bubbleItems.value[bubbleItems.value.length - 1].typing = false
@@ -172,8 +171,13 @@
     }
   }
 
-  // 中断请求
+  /**
+   * 停止流式连接
+   * @function cancelSSE
+   * @description 中断流式连接并重置状态
+   */
   async function cancelSSE() {
+    // 中断流式连接
     cancel()
     // 结束最后一条消息打字状态
     if (bubbleItems.value.length) {
@@ -184,7 +188,7 @@
   // 添加消息 - 维护聊天记录
   function addMessage(message: string, isUser: boolean) {
     const i = bubbleItems.value.length
-    const obj = {
+    const obj: MessageItem = {
       key: i,
       avatar: isUser
         ? avatar.value
@@ -201,10 +205,11 @@
       noStyle: !isUser
     }
     bubbleItems.value.push(obj)
+    console.log('添加消息:', obj)
   }
 
   // 展开收起 事件展示
-  function handleChange(payload: { value: boolean; status: ThinkingStatus }) {
+  function handleChange(payload: { value: boolean; status: 'start' | 'loading' | 'end' }) {
     console.log('value', payload.value, 'status', payload.status)
   }
 
@@ -253,15 +258,16 @@
 
         <template #content="{ item }">
           <!-- chat 内容走 markdown -->
-          <XMarkdown
-            v-if="item.content && item.role === 'system'"
-            :markdown="item.content"
-            class="markdown-body"
-            :themes="{ light: 'github-light', dark: 'github-dark' }"
-            default-theme-mode="dark"
-          />
+          <div v-if="item.content && item.role === 'system'">
+            <XMarkdown
+              :markdown="item.content"
+              class="markdown-body"
+              :themes="{ light: 'github-light', dark: 'github-dark' }"
+              default-theme-mode="dark"
+            />
+          </div>
           <!-- user 内容 纯文本 -->
-          <div v-if="item.content && item.role === 'user'" class="user-content">
+          <div v-else-if="item.content && item.role === 'user'" class="user-content">
             {{ item.content }}
           </div>
         </template>
@@ -307,9 +313,7 @@
                   class="prev-next-btn left-8px flex-center w-22px h-22px rounded-8px border-1px border-solid border-[rgba(0,0,0,0.08)] c-[rgba(0,0,0,.4)] hover:bg-#f3f4f6 bg-#fff font-size-10px"
                   @click="onScrollLeft"
                 >
-                  <el-icon>
-                    <ArrowLeftBold />
-                  </el-icon>
+                  <ArtSvg icon="ion:chevron-back" />
                 </div>
               </template>
 
@@ -319,9 +323,7 @@
                   class="prev-next-btn right-8px flex-center w-22px h-22px rounded-8px border-1px border-solid border-[rgba(0,0,0,0.08)] c-[rgba(0,0,0,.4)] hover:bg-#f3f4f6 bg-#fff font-size-10px"
                   @click="onScrollRight"
                 >
-                  <el-icon>
-                    <ArrowRightBold />
-                  </el-icon>
+                  <ArtSvg icon="ion:chevron-forward" />
                 </div>
               </template>
             </Attachments>

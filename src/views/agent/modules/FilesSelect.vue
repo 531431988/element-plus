@@ -47,7 +47,7 @@
     popoverRef.value.hide()
   }
   const buttonRef = ref()
-  const popoverRef = ref<PopoverInstance>()
+  const popoverRef = ref()
   const onClickOutside = () => {
     popoverRef.value?.hide()
   }

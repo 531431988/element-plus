@@ -1,9 +1,9 @@
 import { AppRouteRecord } from '@/types/router'
 
 export const agentRoutes: AppRouteRecord = {
-  path: '/template/agent',
+  path: '/agent',
   name: 'Agent',
-  component: '/template/agent/index',
+  component: '/agent/index',
   meta: {
     title: '智能体',
     icon: 'ri:apps-2-line'

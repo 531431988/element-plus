@@ -153,6 +153,7 @@
    */
   const startSSE = async (content = inputValue.value) => {
     if (!content) return
+    data.value = []
     // 插入用户消息
     addMessage(content, true)
 

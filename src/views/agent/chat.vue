@@ -13,6 +13,7 @@
   import ModelSelect from './modules/ModelSelect.vue'
   import { useFilesStore } from '@stores/modules/files'
   import { useUserStore } from '@stores/modules/user'
+  import Echarts from '@/components/EChartsRenderer.vue'
 
   // 类型定义
   interface MessageItem {
@@ -131,6 +132,19 @@
     return response
   }
 
+  const selfCodeXRender = {
+    // 渲染自定义代码块标识符 javascript, 返回一个组件
+    javascript: (props: { raw: any }) => {
+      return h(
+        'pre',
+        { class: 'language-javascript' },
+        h('code', { class: 'language-javascript' }, props.raw.content)
+      )
+    },
+
+    // 渲染自定义代码块标识符 echarts, Echarts 是自己封装的Vue组件
+    echarts: (props: { raw: any }) => h(Echarts, { code: props.raw.content })
+  }
   /**
    * 发送请求并处理流式连接
    * @async
@@ -193,7 +207,7 @@
       avatar: isUser
         ? avatar.value
         : 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
-      avatarSize: '32px',
+      avatarSize: '42px',
       role: isUser ? 'user' : 'system',
       placement: isUser ? 'end' : 'start',
       isMarkdown: !isUser,
@@ -263,7 +277,8 @@
               :markdown="item.content"
               class="markdown-body"
               :themes="{ light: 'github-light', dark: 'github-dark' }"
-              default-theme-mode="dark"
+              default-theme-mode="light"
+              :code-x-render="selfCodeXRender"
             />
           </div>
           <!-- user 内容 纯文本 -->

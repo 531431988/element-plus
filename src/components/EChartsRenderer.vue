@@ -68,21 +68,21 @@
       // 检查解析结果
       if (!option) {
         console.error('配置解析失败')
-        loading.value = false
+        // 解析失败时保持loading状态，等待配置完整返回
         return
-      } else {
-        // 初始化或更新图表
-        if (!myChart) {
-          myChart = echarts.init(echartRef.value, props.theme)
-        }
-        myChart.setOption(option)
-
-        // 渲染完成，隐藏loading
-        loading.value = false
       }
+
+      // 初始化或更新图表
+      if (!myChart) {
+        myChart = echarts.init(echartRef.value, props.theme)
+      }
+      myChart.setOption(option)
+
+      // 渲染完成，隐藏loading
+      loading.value = false
     } catch (error) {
       console.error('图表渲染失败:', error)
-      loading.value = false
+      // 渲染失败时保持loading状态，等待配置完整返回
     }
   }, 300)
 

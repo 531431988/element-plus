@@ -1,5 +1,5 @@
 <template>
-  <el-container class="!h-full">
+  <el-container class="!h-[100vh]">
     <ArtAgentAside width="280px" />
     <el-container class="bg-white">
       <el-header class="flex items-center justify-between">

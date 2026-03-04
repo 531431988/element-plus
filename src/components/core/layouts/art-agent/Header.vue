@@ -15,7 +15,7 @@
   watch(
     () => isMediumScreen.value,
     (val) => {
-      collapsed.value = !val
+      collapsed.value = val
     }
   )
 </script>

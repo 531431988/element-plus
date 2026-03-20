@@ -3,7 +3,7 @@
 <template>
   <div class="flex flex-col gap-4 pb-5">
     <!-- 功能介绍卡片 -->
-    <ElCard shadow="never" class="art-card-xs">
+    <ElCard class="art-card-xs">
       <template #header>
         <div class="flex-wrap gap-3 flex-cb">
           <h3 class="m-0">高级表格完整能力展示</h3>
@@ -139,7 +139,7 @@
     />
 
     <!-- 表格区域 -->
-    <ElCard class="flex-1 art-table-card" shadow="never" style="margin-top: 0">
+    <ElCard class="flex-1 art-table-card" style="margin-top: 0">
       <template #header>
         <div class="flex-cb">
           <h4 class="m-0">用户数据表格</h4>
@@ -321,7 +321,7 @@
     </ElCard>
 
     <!-- 高级功能演示 -->
-    <ElCard shadow="never" class="art-card-xs">
+    <ElCard class="art-card-xs">
       <template #header>
         <h4 class="m-0">高级功能演示</h4>
       </template>
@@ -384,7 +384,7 @@
     </ElCard>
 
     <!-- 缓存刷新策略演示 -->
-    <ElCard shadow="never" class="art-card-xs">
+    <ElCard class="art-card-xs">
       <template #header>
         <h4 class="m-0">缓存刷新策略演示</h4>
       </template>
@@ -602,6 +602,17 @@
     )
   }
 
+  const buildSearchParams = (params: typeof searchFormState.value) => {
+    const { daterange, ...filtersParams } = params
+    const [startTime, endTime] = Array.isArray(daterange) ? daterange : [null, null]
+
+    return {
+      ...filtersParams,
+      startTime,
+      endTime
+    }
+  }
+
   // 模拟网络请求
   // const simulateNetworkRequest = (): Promise<void> => {
   //   return new Promise((resolve) => {
@@ -638,6 +649,7 @@
 
     // 搜索相关
     searchParams, // 搜索参数
+    replaceSearchParams, // 替换搜索参数
     resetSearchParams, // 重置搜索参数
 
     // 数据操作
@@ -960,11 +972,7 @@
     await searchBarRef.value.validate()
 
     console.log('搜索参数:', searchFormState.value)
-    const { daterange, ...filtersParams } = searchFormState.value
-    const [startTime, endTime] = Array.isArray(daterange) ? daterange : [null, null]
-
-    // 搜索参数赋值
-    Object.assign(searchParams, { ...filtersParams, startTime, endTime })
+    replaceSearchParams(buildSearchParams(searchFormState.value))
     getData()
   }
 
@@ -977,8 +985,8 @@
 
   const handlePhoneSearch = (value: string) => {
     searchFormState.value.phone = value
-    searchParams.phone = value
-    requestParams.value = { ...searchParams, phone: value }
+    replaceSearchParams(buildSearchParams(searchFormState.value))
+    requestParams.value = { ...searchParams }
     addCacheLog(`📱 手机号搜索: ${value}`)
     getDataDebounced()
   }

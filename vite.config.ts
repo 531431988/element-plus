@@ -27,7 +27,7 @@ export default ({ mode }: { mode: string }) => {
     server: {
       port: Number(VITE_PORT),
       proxy: {
-        '/c2m': {
+        '/api': {
           target: VITE_API_PROXY_URL,
           changeOrigin: true
         }

@@ -8,7 +8,7 @@
     <!-- 搜索栏 -->
     <UserSearch v-model="searchForm" @search="handleSearch" @reset="resetSearchParams"></UserSearch>
 
-    <ElCard class="art-table-card" shadow="never">
+    <ElCard class="art-table-card">
       <!-- 表格头部 -->
       <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
         <template #left>
@@ -53,7 +53,7 @@
   } from '@/api/system/user'
   import UserSearch from './modules/user-search.vue'
   import UserDialog from './modules/user-dialog.vue'
-  import { ElTag, ElMessageBox, ElImage, ElMessage } from 'element-plus'
+  import { ElMessageBox, ElMessage, ElSwitch } from 'element-plus'
   import { DialogType } from '@/types'
 
   defineOptions({ name: 'User' })
@@ -83,7 +83,7 @@
     loading,
     pagination,
     getData,
-    searchParams,
+    replaceSearchParams,
     resetSearchParams,
     handleSizeChange,
     handleCurrentChange,
@@ -147,10 +147,16 @@
               'onUpdate:modelValue': async (val: boolean) => {
                 try {
                   const params = { ids: [String(row.id)] }
-                  val ? await fetchUpdateUserLocked(params) : await fetchUpdateUserUnLocked(params)
+                  if (val) {
+                    await fetchUpdateUserLocked(params)
+                  } else {
+                    await fetchUpdateUserUnLocked(params)
+                  }
                   ElMessage.success('操作成功')
                   refreshData()
-                } catch (error) {}
+                } catch (error) {
+                  console.error(error)
+                }
               }
             })
           }
@@ -205,10 +211,8 @@
    * 搜索处理
    * @param params 参数
    */
-  const handleSearch = (params: Record<string, any>) => {
-    console.log(params)
-    // 搜索参数赋值
-    Object.assign(searchParams, params)
+  const handleSearch = (params: Api.SystemManage.UserSearchParams) => {
+    replaceSearchParams(params)
     getData()
   }
 

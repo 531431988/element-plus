@@ -8,11 +8,7 @@
       @reset="resetSearchParams"
     ></RoleSearch>
 
-    <ElCard
-      class="art-table-card"
-      shadow="never"
-      :style="{ 'margin-top': showSearchBar ? '12px' : '0' }"
-    >
+    <ElCard class="art-table-card" :style="{ 'margin-top': showSearchBar ? '12px' : '0' }">
       <ArtTableHeader
         v-model:columns="columnChecks"
         v-model:showSearchBar="showSearchBar"
@@ -68,11 +64,14 @@
   import RoleSearch from './modules/role-search.vue'
   import RoleEditDialog from './modules/role-edit-dialog.vue'
   import RolePermissionDialog from './modules/role-permission-dialog.vue'
-  import { ElTag, ElMessageBox, ElSwitch, ElMessage } from 'element-plus'
+  import { ElMessageBox, ElSwitch, ElMessage } from 'element-plus'
 
   defineOptions({ name: 'Role' })
 
   type RoleListItem = Api.SystemManage.RoleListItem
+  type RoleSearchFormParams = Api.SystemManage.RoleSearchParams & {
+    daterange?: string[]
+  }
 
   // 搜索表单
   const searchForm = ref({
@@ -93,7 +92,7 @@
     loading,
     pagination,
     getData,
-    searchParams,
+    replaceSearchParams,
     resetSearchParams,
     handleSizeChange,
     handleCurrentChange,
@@ -139,10 +138,16 @@
               'onUpdate:modelValue': async (val: number) => {
                 try {
                   const params = { id: String(row.id) }
-                  val ? await fetchEnableRole(params) : await fetchDisableRole(params)
+                  if (val) {
+                    await fetchEnableRole(params)
+                  } else {
+                    await fetchDisableRole(params)
+                  }
                   ElMessage.success('操作成功')
                   refreshData()
-                } catch (error) {}
+                } catch (error) {
+                  console.error(error)
+                }
               }
             })
           }
@@ -199,13 +204,12 @@
    * 搜索处理
    * @param params 搜索参数
    */
-  const handleSearch = (params: Record<string, any>) => {
+  const handleSearch = (params: RoleSearchFormParams) => {
     // 处理日期区间参数，把 daterange 转换为 startTime 和 endTime
     const { daterange, ...filtersParams } = params
     const [startTime, endTime] = Array.isArray(daterange) ? daterange : [null, null]
 
-    // 搜索参数赋值
-    Object.assign(searchParams, { ...filtersParams, startTime, endTime })
+    replaceSearchParams({ ...filtersParams, startTime, endTime })
     getData()
   }
 

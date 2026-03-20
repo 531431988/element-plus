@@ -65,7 +65,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (request: InternalAxiosRequestConfig) => {
     const { accessToken } = useUserStore()
-    if (accessToken) request.headers.set('Authorization', `Bearer ${accessToken}`)
+    if (accessToken) request.headers.set('Authorization', accessToken)
 
     if (request.data && !(request.data instanceof FormData) && !request.headers['Content-Type']) {
       request.headers.set('Content-Type', 'application/json')
@@ -85,7 +85,6 @@ axiosInstance.interceptors.response.use(
   (response: AxiosResponse<BaseResponse>) => {
     const { code, msg } = response.data
     if (code === ApiStatus.success) return response
-    if (code === ApiStatus.forbidden) logOut()
     if (code === ApiStatus.unauthorized) handleUnauthorizedError(msg)
     throw createHttpError(msg || $t('httpMsg.requestFailed'), code)
   },
@@ -165,9 +164,9 @@ function delay(ms: number) {
 
 /** 请求函数 */
 async function request<T = any>(config: ExtendedAxiosRequestConfig): Promise<T> {
-  // POST | PUT | DELETE 参数自动填充
+  // POST | PUT 参数自动填充
   if (
-    ['POST', 'PUT', 'DELETE'].includes(config.method?.toUpperCase() || '') &&
+    ['POST', 'PUT'].includes(config.method?.toUpperCase() || '') &&
     config.params &&
     !config.data
   ) {

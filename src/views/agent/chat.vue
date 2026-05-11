@@ -34,8 +34,8 @@
 
   // 配置
   const CONFIG = {
-    API_URL: 'http://192.168.120.39:8090/v1/chat-messages',
-    API_KEY: 'app-NVz8xJbVqDKqoCN7nWo7ml24',
+    API_URL: 'http://192.168.5.62/v1/chat-messages',
+    API_KEY: 'app-76jyuw9eGj185jwgz5Ji4tAr',
     SCROLL_DELAY: 350,
     USER_ID: 'abc-123'
   }
@@ -84,6 +84,7 @@
             case 'error':
               break
             case 'message':
+            case 'agent_message':
               if (parsedChunk.answer) return text + parsedChunk.answer
               break
             default:
